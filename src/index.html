@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      overflow: hidden;
+    }
+    
+    #drag-handle {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 25px;
+      -webkit-app-region: drag;
+      cursor: move;
+      background: rgba(255, 255, 255, 0.15);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    #drag-handle:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+    
+    #drag-handle.hidden {
+      display: none;
+    }
+    
+    #grid-container {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      pointer-events: auto;
+      cursor: crosshair;
+    }
+    
+    #controls {
+      -webkit-app-region: no-drag;
+    }
+    
+    #grid-container {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      pointer-events: auto;
+      cursor: crosshair;
+    }
+    
+    .tile {
+      position: absolute;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      transition: background-color 0.3s ease;
+    }
+    
+    .tile.highlight {
+      animation: borderHighlightFade 10s ease-out forwards;
+    }
+
+    @keyframes borderHighlightFade {
+      0% {
+        border-color: rgba(0, 255, 0, 1);
+        border-width: 3px;
+        box-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+      }
+      100% {
+        border-color: rgba(255, 255, 255, 0.3);
+        border-width: 1px;
+        box-shadow: none;
+      }
+    }
+
+    #grid-container.locked .tile {
+      /* Tiles are still clickable in locked mode, we handle passthrough manually */
+    }
+    
+    #controls {
+      position: fixed;
+      top: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 5px 10px;
+      border-radius: 0 0 0 5px;
+      color: white;
+      font-family: Arial, sans-serif;
+      font-size: 11px;
+      z-index: 1000;
+      cursor: default;
+    }
+    
+    #controls button {
+      margin: 0 5px;
+      padding: 3px 8px;
+      cursor: pointer;
+      font-size: 10px;
+    }
+    
+    #status {
+      position: fixed;
+      bottom: 10px;
+      left: 10px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 5px 10px;
+      border-radius: 5px;
+      color: #0f0;
+      font-family: Arial, sans-serif;
+      font-size: 11px;
+      z-index: 1000;
+      transition: opacity 0.5s ease;
+    }
+
+    #status.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #controls.hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="drag-handle"></div>
+  <div id="grid-container"></div>
+  
+  <div id="controls">
+    <button id="btn-calibrate">Calibrate</button>
+    <button id="btn-hide-menu">Hide Menu</button>
+  </div>
+
+  <div id="status" class="hidden">Ready - Click Calibrate or press C</div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

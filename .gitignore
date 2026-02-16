@@ -1,0 +1,58 @@
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# Build outputs
+build/*
+!build/.gitkeep
+dist/
+*.app
+*.dmg
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Electron
+out/
+release/
+
+# Compiled native binaries (keep source, ignore builds)
+# These should be compiled locally
+# click_helper
+global_mouse_tracker
+*.o
+*.so
+*.dylib
+
+# Large libraries
+src/opencv.js
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Temporary files
+tmp/
+temp/
+*.tmp

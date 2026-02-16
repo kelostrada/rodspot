@@ -1,0 +1,19 @@
+{
+  "name": "rodspot",
+  "version": "1.0.0",
+  "description": "Transparent grid overlay with global mouse tracking for gaming",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron .",
+    "build-native": "mkdir -p build && gcc -framework ApplicationServices -o build/global_mouse_tracker native/global_mouse_tracker.c"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "screenshot-desktop": "^1.15.0"
+  },
+  "devDependencies": {
+    "electron": "^40.4.1"
+  }
+}
