@@ -44,6 +44,7 @@ function createOverlay() {
     skipTaskbar: true,
     resizable: true,
     hasShadow: false,
+    roundedCorners: false,
     movable: true,
     webPreferences: {
       nodeIntegration: false,
