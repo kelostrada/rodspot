@@ -74,23 +74,12 @@ This design allows:
 - `src/preload.js` - IPC bridge
 - `src/index.html` - UI layout and styles
 - `native/global_mouse_tracker.c` - Native C mouse tracking source
-- `build/global_mouse_tracker` - Compiled native tracker (generated)
 
 ## Prerequisites
 
 **macOS only**
 
-### 1. Compile the Global Mouse Tracker
-
-The native mouse tracker lives in `native/` and compiles to `build/`:
-
-```bash
-npm run build-native
-```
-
-This compiles `native/global_mouse_tracker.c` to `build/global_mouse_tracker`.
-
-### 2. Grant Accessibility Permissions
+### Grant Accessibility Permissions
 
 The global mouse tracker requires accessibility permissions to monitor system-wide mouse events:
 
@@ -103,23 +92,19 @@ The global mouse tracker requires accessibility permissions to monitor system-wi
 
 ## Usage
 
-1. **Compile the mouse tracker**:
-   ```bash
-   npm run build-native
-   ```
+1. **Grant accessibility permissions** (see Prerequisites above)
 
-2. **Grant accessibility permissions** (see Prerequisites above)
-
-3. **Start the app**:
+2. **Start the app**:
    ```bash
    npm start
    ```
+   This automatically compiles the native mouse tracker and launches the app.
 
-4. **Position the overlay**: Drag using the top handle to position over your game
+3. **Position the overlay**: Drag using the top handle to position over your game
 
-5. **Calibrate**: Click "Calibrate" then click top-left and bottom-right of your game viewport
+4. **Calibrate**: Click "Calibrate" then click top-left and bottom-right of your game viewport
 
-6. **Click tiles**: Click any grid tile - it will highlight with a green border AND the click passes through to your game naturally
+5. **Click tiles**: Click any grid tile - it will highlight with a green border AND the click passes through to your game naturally
 
 **You can now**: drag items, right-click, fish, use all game features normally while seeing which tiles you click!
 
@@ -142,7 +127,6 @@ This gives us the best of both worlds: a visual grid overlay that doesn't interf
 
 ### Current Limitations
 - **macOS only** - Uses Core Graphics APIs specific to macOS
-- **Requires compilation** - Native tracker needs to be compiled from C source
 - **Grid size is fixed** (15x11)
 - **No auto-calibration** - Manual calibration required
 
