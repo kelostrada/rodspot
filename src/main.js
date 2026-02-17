@@ -215,6 +215,10 @@ ipcMain.on('stop-fishing', (event) => {
   }
 });
 
+ipcMain.on('exit-app', () => {
+  app.quit();
+});
+
 app.whenReady().then(() => {
   console.log('App ready...');
   createOverlay();

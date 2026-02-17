@@ -11,5 +11,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   setFullscreen: (enabled) => ipcRenderer.send('set-fullscreen', enabled),
   setNormalSize: (bounds) => ipcRenderer.send('set-normal-size', bounds),
   startFishing: () => ipcRenderer.send('start-fishing'),
-  stopFishing: () => ipcRenderer.send('stop-fishing')
+  stopFishing: () => ipcRenderer.send('stop-fishing'),
+  exit: () => ipcRenderer.send('exit-app')
 });

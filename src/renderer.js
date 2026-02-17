@@ -195,6 +195,11 @@ document.getElementById('btn-start-fishing').addEventListener('click', (e) => {
   startFishing();
 });
 
+document.getElementById('btn-exit').addEventListener('click', (e) => {
+  e.stopPropagation();
+  window.electronAPI.exit();
+});
+
 function startFishing() {
   fishingMode = true;
   document.getElementById('controls').classList.add('hidden');
