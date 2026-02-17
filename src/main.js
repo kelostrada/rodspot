@@ -31,6 +31,44 @@ function saveBounds(bounds) {
   }
 }
 
+function validateBounds(bounds) {
+  if (!bounds || !bounds.x || !bounds.y || !bounds.width || !bounds.height) {
+    return null;
+  }
+
+  const displays = screen.getAllDisplays();
+  let isVisible = false;
+
+  for (const display of displays) {
+    const { x, y, width, height } = display.bounds;
+    const windowCenterX = bounds.x + bounds.width / 2;
+    const windowCenterY = bounds.y + bounds.height / 2;
+
+    if (windowCenterX >= x && windowCenterX <= x + width &&
+        windowCenterY >= y && windowCenterY <= y + height) {
+      isVisible = true;
+      break;
+    }
+  }
+
+  if (isVisible) {
+    return bounds;
+  }
+
+  const primaryDisplay = screen.getPrimaryDisplay();
+  const { width: screenWidth, height: screenHeight } = primaryDisplay.workAreaSize;
+
+  const adjustedWidth = Math.min(bounds.width, screenWidth - 100);
+  const adjustedHeight = Math.min(bounds.height, screenHeight - 100);
+
+  return {
+    x: 100,
+    y: 100,
+    width: adjustedWidth,
+    height: adjustedHeight
+  };
+}
+
 function createOverlay() {
   const primaryDisplay = screen.getPrimaryDisplay();
   const { width, height } = primaryDisplay.workAreaSize;
@@ -108,7 +146,13 @@ ipcMain.handle('set-overlay-bounds', (event, bounds) => {
 });
 
 ipcMain.handle('get-saved-bounds', () => {
-  return loadSavedBounds();
+  const savedBounds = loadSavedBounds();
+  const validatedBounds = validateBounds(savedBounds);
+  if (validatedBounds && JSON.stringify(validatedBounds) !== JSON.stringify(savedBounds)) {
+    console.log('Adjusted out-of-screen bounds:', savedBounds, '->', validatedBounds);
+    saveBounds(validatedBounds);
+  }
+  return validatedBounds;
 });
 
 function sendBoundsToRenderer() {
