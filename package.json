@@ -8,9 +8,9 @@
     "dev": "npm run build-native && electron .",
     "build-native": "node scripts/build-native.js",
     "clean-native": "rm -f build/*",
-    "build": "electron-builder",
+    "build": "electron-builder && node scripts/fix-icon.js",
     "build:mac": "electron-builder --mac",
-    "build:win": "electron-builder --win",
+    "build:win": "electron-builder --win && node scripts/fix-icon.js",
     "build:linux": "electron-builder --linux"
   },
   "build": {
@@ -23,14 +23,19 @@
       "src/**/*",
       "native/**/*",
       "build/**/*",
+      "assets/**/*",
       "package.json"
     ],
+    "icon": "assets/icon.png",
     "mac": {
       "target": "dmg"
     },
     "win": {
       "target": "dir",
-      "asarUnpack": ["build/**/*"]
+      "icon": "assets/icon.ico",
+      "asarUnpack": [
+        "build/**/*"
+      ]
     },
     "linux": {
       "target": "AppImage"
@@ -47,6 +52,7 @@
   },
   "devDependencies": {
     "electron": "^40.4.1",
-    "electron-builder": "^26.7.0"
+    "electron-builder": "^26.7.0",
+    "rcedit": "^5.0.2"
   }
 }

@@ -1,4 +1,4 @@
-const { app, BrowserWindow, screen, ipcMain, globalShortcut } = require('electron');
+const { app, BrowserWindow, screen, ipcMain, globalShortcut, Tray, Menu, nativeImage } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
@@ -6,6 +6,7 @@ const os = require('os');
 
 let overlayWindow;
 let mouseTracker = null;
+let tray = null;
 
 const configPath = path.join(app.getPath('userData'), 'rodspot-config.json');
 
@@ -222,8 +223,43 @@ ipcMain.on('exit-app', () => {
   app.quit();
 });
 
+function getIconPath() {
+  let iconPath = path.join(__dirname, '..', 'assets', 'icon.png');
+  if (!fs.existsSync(iconPath)) {
+    iconPath = path.join(process.resourcesPath, 'assets', 'icon.png');
+  }
+  return iconPath;
+}
+
+function createTray() {
+  const icon = nativeImage.createFromPath(getIconPath());
+  tray = new Tray(icon.resize({ width: 16, height: 16 }));
+  
+  const contextMenu = Menu.buildFromTemplate([
+    { label: 'Show Window', click: () => {
+      if (overlayWindow && !overlayWindow.isDestroyed()) {
+        overlayWindow.show();
+        overlayWindow.focus();
+      }
+    }},
+    { type: 'separator' },
+    { label: 'Exit', click: () => app.quit() }
+  ]);
+  
+  tray.setToolTip('RodSpot');
+  tray.setContextMenu(contextMenu);
+  
+  tray.on('double-click', () => {
+    if (overlayWindow && !overlayWindow.isDestroyed()) {
+      overlayWindow.show();
+      overlayWindow.focus();
+    }
+  });
+}
+
 app.whenReady().then(() => {
   console.log('App ready...');
+  createTray();
   createOverlay();
   
   // Focus the window to enable keyboard input
@@ -233,9 +269,7 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+  // Don't quit - keep running in system tray
 });
 
 app.on('will-quit', () => {

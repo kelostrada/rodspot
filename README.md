@@ -25,6 +25,12 @@ A transparent grid overlay for **Tibia fishing** - helps you maintain spatial aw
 ### UI Controls
 - **Calibrate** button: Start calibration mode
 - **Start Fishing** button: Enter fishing mode
+- **Exit** button: Close the application
+
+### System Tray
+- App runs in the system tray (bottom-right corner)
+- **Double-click** tray icon to show window
+- **Right-click** for menu (Show Window, Exit)
 
 ### Window Management
 - **Drag handle**: Move the overlay window
@@ -62,10 +68,25 @@ npm run build-native
 npm run dev
 
 # Build for distribution
-npm run build        # Current platform
-npm run build:mac   # macOS
-npm run build:win    # Windows
-npm run build:linux # Linux
+npm run build:win    # Windows (creates dist/win-unpacked/)
+npm run build:mac    # macOS
+npm run build:linux  # Linux
+```
+
+### Running the Built App (Windows)
+
+After running `npm run build:win`, the standalone executable is located at:
+
+```
+dist/win-unpacked/RodSpot.exe
+```
+
+You can run it directly or copy the entire `dist/win-unpacked/` folder to distribute.
+
+To create a ZIP archive:
+```bash
+cd dist
+powershell -command "Compress-Archive -Path win-unpacked/* -DestinationPath RodSpot-win64.zip"
 ```
 
 ## Usage
