@@ -1,105 +1,119 @@
 # RodSpot
 
-A transparent grid overlay for gaming applications, designed to help with spatial awareness and clicking accuracy.
+A transparent grid overlay for **Tibia fishing** - helps you maintain spatial awareness and click accuracy during repetitive fishing sessions.
 
 ## Features
 
-### Implemented ✓
-
-#### Grid System
+### Grid System
 - **15x11 tile grid** overlay that can be positioned over any game window
-- Each tile can be highlighted when clicked
 - Grid automatically resizes with the window
 - **Green border highlight** on click with 10-second fade-out animation
-- Click directly on tiles to highlight them
 
-#### Calibration
-- Set custom viewport bounds by clicking **top-left** and **bottom-right** corners
-- Grid automatically adjusts to calibrated area
-- Saves calibration settings between sessions
+### Two Modes
 
-#### UI Controls
+#### Setup Mode (Default)
+- Grid visible, can resize/move freely
+- Can calibrate viewport bounds
+- Menu and controls accessible
+
+#### Fishing Mode
+- Menu and drag handle hidden
+- Window ignores mouse events (passthrough)
+- Native global mouse tracker captures clicks through to the game
+- Tile clicks are highlighted visually
+
+### UI Controls
 - **Calibrate** button: Start calibration mode
-- **Hide Menu** button: Hide/show the control panel
-- **Status panel**: Shows current state, auto-hides after 15 seconds
+- **Start Fishing** button: Enter fishing mode
 
-#### Window Management
+### Window Management
 - **Drag handle**: Move the overlay window
 - Always-on-top window
 - Transparent, frameless overlay
 - Saves window position and size between sessions
 
-#### Keyboard Shortcuts
+### Keyboard Shortcuts
 - `C` - Start calibration
-- `M` - Toggle menu visibility
+- `ESC` - Exit fishing mode (works globally)
 
-### Not Implemented / Future Ideas 💡
+## Building
 
-- **Custom grid sizes**: Currently hardcoded to 15x11
-- **Color customization**: Highlight color is fixed (green)
-- **Audio feedback**: Click sounds on tile selection
-- **Game auto-detection**: Would automatically find game viewport
+### Prerequisites
+
+**All Platforms:**
+- Node.js and npm
+
+**Platform-specific:**
+
+- **macOS**: Xcode Command Line Tools (`xcode-select --install`)
+- **Windows**: MinGW or Visual Studio with C compiler
+- **Linux**: GCC and X11 development libraries (`sudo apt install libx11-dev`)
+
+### Build Commands
+
+```bash
+# Install dependencies
+npm install
+
+# Build native mouse tracker (auto-detects platform)
+npm run build-native
+
+# Run in development
+npm run dev
+
+# Build for distribution
+npm run build        # Current platform
+npm run build:mac   # macOS
+npm run build:win    # Windows
+npm run build:linux # Linux
+```
+
+## Usage
+
+### Running the App
+
+```bash
+npm start
+```
+
+This automatically builds the native mouse tracker and launches the app.
+
+### Setup Mode
+
+1. **Position the overlay**: Drag using the top handle to position over your game
+2. **Resize**: Drag edges to adjust grid size
+3. **Calibrate**: Click "Calibrate" then click top-left and bottom-right corners of your game viewport
+
+### Fishing Mode
+
+1. Click **Start Fishing** button
+2. Menu and drag handle disappear - the window is now transparent to mouse
+3. Click anywhere on the grid - tiles will highlight with a green border
+4. Clicks pass through to your game naturally
+5. Press **ESC** anywhere to exit fishing mode and return to setup mode
 
 ## Architecture
 
 ### How It Works
 
-1. **Electron Overlay Window**: Displays the transparent grid with click handling enabled
-2. **Tile Detection**: When you click on the grid, the renderer calculates which tile was clicked based on click position
-3. **Highlighting**: The clicked tile is highlighted with a green border for 10 seconds
-
-This design allows:
-- ✅ **Interactive grid** - click tiles directly to highlight them
-- ✅ **Easy menu access** - menu items and controls are clickable
-- ✅ **Simple resizing/moving** - window can be resized and moved without issues
-
-## Technical Implementation
+1. **Normal Mode**: Electron window handles clicks directly for setup/resize
+2. **Fishing Mode**: 
+   - Window uses `setIgnoreMouseEvents(true)` for passthrough
+   - Native C process monitors global mouse events
+   - Calculates which tile was clicked based on screen coordinates
+   - Sends tile info to renderer for highlighting
 
 ### Components
 
-- **Electron Main Process** (`src/main.js`): Window management, handles IPC
-- **Renderer Process** (`src/renderer.js`): Grid rendering, tile detection on click, tile highlighting, UI updates
-- **Preload Script** (`src/preload.js`): Secure IPC bridge between main and renderer
+- **Electron Main Process** (`src/main.js`): Window management, native process management, IPC
+- **Renderer Process** (`src/renderer.js`): Grid rendering, tile highlighting, UI updates
+- **Preload Script** (`src/preload.js`): Secure IPC bridge
+- **Native Mouse Tracker**: Platform-specific global mouse event capture
 
-### Key Files
-- `src/main.js` - Electron main process, window management
-- `src/renderer.js` - Grid rendering, tile detection, UI logic
-- `src/preload.js` - IPC bridge
-- `src/index.html` - UI layout and styles
-
-## Prerequisites
-
-**macOS only**
-
-No additional setup required - just run the app!
-
-## Usage
-
-1. **Start the app**:
-   ```bash
-   npm start
-   ```
-
-2. **Position the overlay**: Drag using the top handle to position over your game
-
-3. **Calibrate**: Click "Calibrate" then click top-left and bottom-right of your game viewport
-
-4. **Click tiles**: Click any grid tile - it will highlight with a green border
-
-## Development Notes
-
-### Design Philosophy
-The overlay window handles clicks directly, making it simple and reliable:
-1. Clicks on the grid are detected by the renderer
-2. Tile position is calculated based on click coordinates relative to the container
-3. The clicked tile is highlighted
-
-This approach is simple and avoids the complexity of global mouse tracking.
-
-### Current Limitations
-- **macOS only** - Uses Electron APIs
-- **Grid size is fixed** (15x11)
-- **No auto-calibration** - Manual calibration required
+### Native Trackers
+- `native/global_mouse_tracker.c` - macOS (CoreGraphics)
+- `native/global_mouse_tracker_win.c` - Windows (Win32 API)
+- `native/global_mouse_tracker_linux.c` - Linux (X11)
 
 ## License
 
