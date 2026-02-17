@@ -138,7 +138,7 @@ function startMouseTracker() {
     bounds.height.toString()
   ]);
   
-  mouseTracker.stdout.on('data', (data) => {
+  mouseTracker.stderr.on('data', (data) => {
     const lines = data.toString().trim().split('\n');
     lines.forEach(line => {
       console.log('Tracker:', line);
@@ -159,8 +159,8 @@ function startMouseTracker() {
     });
   });
   
-  mouseTracker.stderr.on('data', (data) => {
-    console.error('Tracker error:', data.toString());
+  mouseTracker.stdout.on('data', (data) => {
+    console.log('Tracker stdout:', data.toString());
   });
   
   mouseTracker.on('close', (code) => {
