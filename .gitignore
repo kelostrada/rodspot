@@ -39,7 +39,6 @@ release/
 
 # Compiled native binaries (keep source, ignore builds)
 # These should be compiled locally
-# click_helper
 global_mouse_tracker
 *.o
 *.so
