@@ -2,6 +2,7 @@ const { app, BrowserWindow, screen, ipcMain, globalShortcut } = require('electro
 const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
+const os = require('os');
 
 let overlayWindow;
 let mouseTracker = null;
@@ -125,7 +126,8 @@ function startMouseTracker() {
   if (!overlayWindow || overlayWindow.isDestroyed()) return;
   
   const bounds = overlayWindow.getBounds();
-  const trackerPath = path.join(__dirname, '..', 'build', 'global_mouse_tracker');
+  const ext = os.platform() === 'win32' ? '.exe' : '';
+  const trackerPath = path.join(__dirname, '..', 'build', `global_mouse_tracker${ext}`);
   
   console.log('Starting mouse tracker with bounds:', bounds);
   

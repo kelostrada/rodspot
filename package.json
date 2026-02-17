@@ -6,8 +6,37 @@
   "scripts": {
     "start": "npm run build-native && electron .",
     "dev": "npm run build-native && electron .",
-    "build-native": "mkdir -p build && gcc -framework ApplicationServices -o build/global_mouse_tracker native/global_mouse_tracker.c",
-    "clean-native": "rm -f build/global_mouse_tracker"
+    "build-native": "node scripts/build-native.js",
+    "clean-native": "rm -f build/*",
+    "build": "electron-builder",
+    "build:mac": "electron-builder --mac",
+    "build:win": "electron-builder --win",
+    "build:linux": "electron-builder --linux"
+  },
+  "build": {
+    "appId": "com.rodspot.app",
+    "productName": "RodSpot",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "native/**/*",
+      "package.json"
+    ],
+    "mac": {
+      "target": "dmg"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "AppImage"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
   },
   "author": "",
   "license": "MIT",
@@ -15,6 +44,7 @@
     "screenshot-desktop": "^1.15.0"
   },
   "devDependencies": {
-    "electron": "^40.4.1"
+    "electron": "^40.4.1",
+    "electron-builder": "^26.7.0"
   }
 }
