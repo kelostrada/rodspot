@@ -44,8 +44,7 @@ void printTileAtPoint(int x, int y) {
     if (row < 0) row = 0;
     if (row >= GRID_ROWS) row = GRID_ROWS - 1;
     
-    printf("TILE_CLICKED %d %d %d %d\n", col, row, x, y);
-    fflush(stdout);
+    fprintf(stderr, "TILE_CLICKED %d %d %d %d\n", col, row, x, y);
 }
 
 CGEventRef mouseCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon) {
@@ -89,10 +88,9 @@ int main(int argc, char *argv[]) {
         overlayHeight = atoi(argv[4]);
     }
     
-    printf("Mouse tracker started\n");
-    printf("Overlay bounds: x=%d y=%d w=%d h=%d\n", overlayX, overlayY, overlayWidth, overlayHeight);
-    printf("Monitoring for clicks...\n");
-    fflush(stdout);
+    fprintf(stderr, "Mouse tracker started\n");
+    fprintf(stderr, "Overlay bounds: x=%d y=%d w=%d h=%d\n", overlayX, overlayY, overlayWidth, overlayHeight);
+    fprintf(stderr, "Monitoring for clicks...\n");
     
     // Create event tap for mouse events
     CGEventMask eventMask = (1 << kCGEventLeftMouseDown) | (1 << kCGEventRightMouseDown);
