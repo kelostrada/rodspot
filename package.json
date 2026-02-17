@@ -29,7 +29,10 @@
     ],
     "icon": "assets/icon.png",
     "mac": {
-      "target": "dir"
+      "target": "dir",
+      "asarUnpack": [
+        "build/**/*"
+      ]
     },
     "win": {
       "target": "dir",
