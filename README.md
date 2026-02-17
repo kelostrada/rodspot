@@ -68,25 +68,36 @@ npm run build-native
 npm run dev
 
 # Build for distribution
-npm run build:win    # Windows (creates dist/win-unpacked/)
+npm run build:win    # Windows
 npm run build:mac    # macOS
 npm run build:linux  # Linux
 ```
 
-### Running the Built App (Windows)
+### Build Output
 
-After running `npm run build:win`, the standalone executable is located at:
+After building, the output is located in `dist/`:
 
-```
-dist/win-unpacked/RodSpot.exe
-```
+| Platform | Folder | ZIP |
+|----------|--------|-----|
+| Windows | `dist/win/` | `dist/RodSpot-win64.zip` |
+| macOS | `dist/macos/` | `dist/RodSpot-macos.zip` |
+| Linux | `dist/linux/` | `dist/RodSpot-linux.zip` |
 
-You can run it directly or copy the entire `dist/win-unpacked/` folder to distribute.
+### Running the Built App
 
-To create a ZIP archive:
+**Windows:**
 ```bash
-cd dist
-powershell -command "Compress-Archive -Path win-unpacked/* -DestinationPath RodSpot-win64.zip"
+dist/win/RodSpot.exe
+```
+
+**macOS:**
+```bash
+dist/macos/RodSpot.app/Contents/MacOS/RodSpot
+```
+
+**Linux:**
+```bash
+dist/linux/RodSpot.AppImage
 ```
 
 ## Usage

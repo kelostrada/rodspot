@@ -51,6 +51,4 @@ coverage/
 tmp/
 temp/
 *.tmp
-hello.c
-hello.exe
-nul
+fish.png

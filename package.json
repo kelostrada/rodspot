@@ -8,10 +8,11 @@
     "dev": "npm run build-native && electron .",
     "build-native": "node scripts/build-native.js",
     "clean-native": "rm -f build/*",
-    "build": "electron-builder && node scripts/fix-icon.js",
-    "build:mac": "electron-builder --mac",
+    "build": "electron-builder && npm run postbuild",
     "build:win": "electron-builder --win && node scripts/fix-icon.js",
-    "build:linux": "electron-builder --linux"
+    "build:mac": "electron-builder --mac && node scripts/fix-mac.js",
+    "build:linux": "electron-builder --linux && node scripts/fix-linux.js",
+    "postbuild": "node scripts/fix-icon.js || node scripts/fix-mac.js || node scripts/fix-linux.js"
   },
   "build": {
     "appId": "com.rodspot.app",
@@ -28,7 +29,7 @@
     ],
     "icon": "assets/icon.png",
     "mac": {
-      "target": "dmg"
+      "target": "dir"
     },
     "win": {
       "target": "dir",
