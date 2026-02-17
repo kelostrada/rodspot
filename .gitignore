@@ -37,12 +37,8 @@ yarn-error.log*
 out/
 release/
 
-# Compiled native binaries (keep source, ignore builds)
-# These should be compiled locally
-global_mouse_tracker
-*.o
-*.so
-*.dylib
+# Compiled native binaries
+build/
 
 # Large libraries
 src/opencv.js

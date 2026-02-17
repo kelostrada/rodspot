@@ -52,94 +52,23 @@ function createOverlay() {
     }
   });
 
-  // Set window to ignore mouse events - clicks pass through to underlying apps
-  overlayWindow.setIgnoreMouseEvents(true);
-  
   overlayWindow.loadFile('src/index.html');
   
   overlayWindow.on('moved', () => {
     const bounds = overlayWindow.getBounds();
     sendBoundsToRenderer();
     saveBounds(bounds);
-    restartMouseTracker(); // Restart tracker with new bounds
+    restartMouseTracker();
   });
   
   overlayWindow.on('resized', () => {
     const bounds = overlayWindow.getBounds();
     sendBoundsToRenderer();
     saveBounds(bounds);
-    restartMouseTracker(); // Restart tracker with new bounds
+    restartMouseTracker();
   });
 
-  console.log('RodSpot overlay created in passthrough mode');
-}
-
-// Start the global mouse tracker
-function startMouseTracker() {
-  if (mouseTracker) {
-    mouseTracker.kill();
-    mouseTracker = null;
-  }
-  
-  if (!overlayWindow || overlayWindow.isDestroyed()) return;
-  
-  const bounds = overlayWindow.getBounds();
-  const trackerPath = path.join(__dirname, '..', 'build', 'global_mouse_tracker');
-  
-  console.log('Starting mouse tracker with bounds:', bounds);
-  
-  mouseTracker = spawn(trackerPath, [
-    bounds.x.toString(),
-    bounds.y.toString(),
-    bounds.width.toString(),
-    bounds.height.toString()
-  ]);
-  
-  mouseTracker.stdout.on('data', (data) => {
-    const lines = data.toString().trim().split('\n');
-    lines.forEach(line => {
-      console.log('Tracker:', line);
-      
-      // Parse TILE_CLICKED messages
-      if (line.startsWith('TILE_CLICKED')) {
-        const parts = line.split(' ');
-        if (parts.length >= 5) {
-          const col = parseInt(parts[1]);
-          const row = parseInt(parts[2]);
-          const x = parseInt(parts[3]);
-          const y = parseInt(parts[4]);
-          
-          // Send to renderer to highlight the tile
-          if (overlayWindow && !overlayWindow.isDestroyed()) {
-            overlayWindow.webContents.send('tile-clicked', { col, row, x, y });
-          }
-        }
-      }
-    });
-  });
-  
-  mouseTracker.stderr.on('data', (data) => {
-    console.error('Tracker error:', data.toString());
-  });
-  
-  mouseTracker.on('close', (code) => {
-    console.log('Mouse tracker exited with code:', code);
-    mouseTracker = null;
-  });
-  
-  mouseTracker.on('error', (err) => {
-    console.error('Failed to start mouse tracker:', err.message);
-    console.error('Make sure global_mouse_tracker is compiled: gcc -framework ApplicationServices -o global_mouse_tracker global_mouse_tracker.c');
-  });
-}
-
-function restartMouseTracker() {
-  if (mouseTracker) {
-    mouseTracker.kill();
-    setTimeout(startMouseTracker, 100);
-  } else {
-    startMouseTracker();
-  }
+  console.log('RodSpot overlay created');
 }
 
 ipcMain.on('set-fullscreen', (event, fullscreen) => {
@@ -170,7 +99,6 @@ ipcMain.handle('set-overlay-bounds', (event, bounds) => {
     overlayWindow.setBounds(bounds);
     overlayWindow.webContents.send('bounds-changed', overlayWindow.getBounds());
     saveBounds(bounds);
-    restartMouseTracker();
     return { success: true };
   }
   return { error: 'Window not available' };
@@ -187,12 +115,106 @@ function sendBoundsToRenderer() {
   }
 }
 
+function startMouseTracker() {
+  if (mouseTracker) {
+    mouseTracker.kill();
+    mouseTracker = null;
+  }
+  
+  if (!overlayWindow || overlayWindow.isDestroyed()) return;
+  
+  const bounds = overlayWindow.getBounds();
+  const trackerPath = path.join(__dirname, '..', 'build', 'global_mouse_tracker');
+  
+  console.log('Starting mouse tracker with bounds:', bounds);
+  
+  mouseTracker = spawn(trackerPath, [
+    bounds.x.toString(),
+    bounds.y.toString(),
+    bounds.width.toString(),
+    bounds.height.toString()
+  ]);
+  
+  mouseTracker.stdout.on('data', (data) => {
+    const lines = data.toString().trim().split('\n');
+    lines.forEach(line => {
+      console.log('Tracker:', line);
+      
+      if (line.startsWith('TILE_CLICKED')) {
+        const parts = line.split(' ');
+        if (parts.length >= 5) {
+          const col = parseInt(parts[1]);
+          const row = parseInt(parts[2]);
+          const x = parseInt(parts[3]);
+          const y = parseInt(parts[4]);
+          
+          if (overlayWindow && !overlayWindow.isDestroyed()) {
+            overlayWindow.webContents.send('tile-clicked', { col, row, x, y });
+          }
+        }
+      }
+    });
+  });
+  
+  mouseTracker.stderr.on('data', (data) => {
+    console.error('Tracker error:', data.toString());
+  });
+  
+  mouseTracker.on('close', (code) => {
+    console.log('Mouse tracker exited with code:', code);
+    mouseTracker = null;
+  });
+  
+  mouseTracker.on('error', (err) => {
+    console.error('Failed to start mouse tracker:', err.message);
+  });
+}
+
+function stopMouseTracker() {
+  if (mouseTracker) {
+    mouseTracker.kill();
+    mouseTracker = null;
+    console.log('Mouse tracker stopped');
+  }
+}
+
+function restartMouseTracker() {
+  if (mouseTracker) {
+    stopMouseTracker();
+    setTimeout(startMouseTracker, 100);
+  }
+}
+
+ipcMain.on('start-fishing', (event) => {
+  console.log('Starting fishing mode - enabling passthrough');
+  if (overlayWindow && !overlayWindow.isDestroyed()) {
+    overlayWindow.setIgnoreMouseEvents(true);
+    startMouseTracker();
+  }
+  
+  // Register global shortcut for ESC to exit fishing mode
+  globalShortcut.register('Escape', () => {
+    console.log('ESC pressed - exiting fishing mode');
+    if (overlayWindow && !overlayWindow.isDestroyed()) {
+      overlayWindow.setIgnoreMouseEvents(false);
+      overlayWindow.webContents.send('exit-fishing');
+    }
+    stopMouseTracker();
+  });
+});
+
+ipcMain.on('stop-fishing', (event) => {
+  console.log('Stopping fishing mode - disabling passthrough');
+  globalShortcut.unregister('Escape');
+  stopMouseTracker();
+  if (overlayWindow && !overlayWindow.isDestroyed()) {
+    overlayWindow.setIgnoreMouseEvents(false);
+  }
+});
+
 app.whenReady().then(() => {
   console.log('App ready...');
   createOverlay();
-  
-  // Start the mouse tracker after window is created
-  setTimeout(startMouseTracker, 1000);
   
   // Focus the window to enable keyboard input
   if (overlayWindow) {
@@ -201,18 +223,12 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', () => {
-  if (mouseTracker) {
-    mouseTracker.kill();
-    mouseTracker = null;
-  }
   if (process.platform !== 'darwin') {
     app.quit();
   }
 });
 
 app.on('will-quit', () => {
-  if (mouseTracker) {
-    mouseTracker.kill();
-    mouseTracker = null;
-  }
+  globalShortcut.unregisterAll();
+  stopMouseTracker();
 });

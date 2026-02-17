@@ -11,12 +11,7 @@ A transparent grid overlay for gaming applications, designed to help with spatia
 - Each tile can be highlighted when clicked
 - Grid automatically resizes with the window
 - **Green border highlight** on click with 10-second fade-out animation
-
-#### Global Mouse Tracking
-- **Separate native process** (`global_mouse_tracker`) monitors all mouse clicks on macOS
-- **Always-on passthrough mode** - overlay window never intercepts clicks
-- Clicks pass naturally through to underlying applications (games)
-- Automatic tile detection based on overlay bounds
+- Click directly on tiles to highlight them
 
 #### Calibration
 - Set custom viewport bounds by clicking **top-left** and **bottom-right** corners
@@ -49,84 +44,60 @@ A transparent grid overlay for gaming applications, designed to help with spatia
 
 ### How It Works
 
-1. **Electron Overlay Window**: Displays the transparent grid, but is set to ignore all mouse events (`setIgnoreMouseEvents(true)`)
-2. **Global Mouse Tracker**: Native C process that monitors ALL mouse clicks across the entire macOS system using Core Graphics event taps
-3. **Tile Detection**: When a click occurs within the overlay bounds, the tracker calculates which tile was clicked and notifies the Electron app
-4. **Highlighting**: Electron app receives the tile coordinates and highlights the appropriate tile
+1. **Electron Overlay Window**: Displays the transparent grid with click handling enabled
+2. **Tile Detection**: When you click on the grid, the renderer calculates which tile was clicked based on click position
+3. **Highlighting**: The clicked tile is highlighted with a green border for 10 seconds
 
 This design allows:
-- ✅ **Natural mouse usage** - dragging, right-clicking, fishing, etc. work normally
-- ✅ **No focus issues** - you never lose focus on your game
-- ✅ **Accurate tracking** - clicks are detected globally, not just within the window
+- ✅ **Interactive grid** - click tiles directly to highlight them
+- ✅ **Easy menu access** - menu items and controls are clickable
+- ✅ **Simple resizing/moving** - window can be resized and moved without issues
 
 ## Technical Implementation
 
 ### Components
 
-- **Electron Main Process** (`src/main.js`): Window management, launches mouse tracker, handles IPC
-- **Renderer Process** (`src/renderer.js`): Grid rendering, tile highlighting, UI updates
-- **Global Mouse Tracker** (`global_mouse_tracker.c`): Native macOS process monitoring global mouse events
+- **Electron Main Process** (`src/main.js`): Window management, handles IPC
+- **Renderer Process** (`src/renderer.js`): Grid rendering, tile detection on click, tile highlighting, UI updates
 - **Preload Script** (`src/preload.js`): Secure IPC bridge between main and renderer
 
 ### Key Files
 - `src/main.js` - Electron main process, window management
-- `src/renderer.js` - Grid rendering, UI logic
+- `src/renderer.js` - Grid rendering, tile detection, UI logic
 - `src/preload.js` - IPC bridge
 - `src/index.html` - UI layout and styles
-- `native/global_mouse_tracker.c` - Native C mouse tracking source
 
 ## Prerequisites
 
 **macOS only**
 
-### Grant Accessibility Permissions
-
-The global mouse tracker requires accessibility permissions to monitor system-wide mouse events:
-
-1. Go to **System Preferences > Security & Privacy > Privacy > Accessibility**
-2. Click the lock and enter your password
-3. Add **Terminal** (or iTerm, or whichever terminal you use) to the list
-4. Check the box to enable it
-
-**Note**: You must grant permissions to your terminal application, not the Electron app itself.
+No additional setup required - just run the app!
 
 ## Usage
 
-1. **Grant accessibility permissions** (see Prerequisites above)
-
-2. **Start the app**:
+1. **Start the app**:
    ```bash
    npm start
    ```
-   This automatically compiles the native mouse tracker and launches the app.
 
-3. **Position the overlay**: Drag using the top handle to position over your game
+2. **Position the overlay**: Drag using the top handle to position over your game
 
-4. **Calibrate**: Click "Calibrate" then click top-left and bottom-right of your game viewport
+3. **Calibrate**: Click "Calibrate" then click top-left and bottom-right of your game viewport
 
-5. **Click tiles**: Click any grid tile - it will highlight with a green border AND the click passes through to your game naturally
-
-**You can now**: drag items, right-click, fish, use all game features normally while seeing which tiles you click!
+4. **Click tiles**: Click any grid tile - it will highlight with a green border
 
 ## Development Notes
 
 ### Design Philosophy
-The key insight was that trying to intercept and forward clicks creates too many issues (focus, loops, drag operations). Instead, we:
-1. Make the overlay completely ignore mouse events
-2. Monitor clicks globally via a separate process
-3. Calculate which tile was clicked based on screen coordinates
+The overlay window handles clicks directly, making it simple and reliable:
+1. Clicks on the grid are detected by the renderer
+2. Tile position is calculated based on click coordinates relative to the container
+3. The clicked tile is highlighted
 
-This gives us the best of both worlds: a visual grid overlay that doesn't interfere with gameplay.
-
-### Challenges Encountered
-- **Click interception issues**: Initial attempts to intercept and forward clicks caused focus problems and broken drag operations
-- **Solution**: Use `setIgnoreMouseEvents(true)` on the Electron window and monitor clicks via a global event tap instead
-
-- **Accessibility permissions**: macOS requires explicit user permission to monitor global input events
-- **Solution**: Document the permission requirement clearly
+This approach is simple and avoids the complexity of global mouse tracking.
 
 ### Current Limitations
-- **macOS only** - Uses Core Graphics APIs specific to macOS
+- **macOS only** - Uses Electron APIs
 - **Grid size is fixed** (15x11)
 - **No auto-calibration** - Manual calibration required
 

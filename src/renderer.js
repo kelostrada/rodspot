@@ -188,10 +188,28 @@ document.getElementById('btn-calibrate').addEventListener('click', (e) => {
   startCalibration();
 });
 
-document.getElementById('btn-hide-menu').addEventListener('click', (e) => {
+let fishingMode = false;
+
+document.getElementById('btn-start-fishing').addEventListener('click', (e) => {
   e.stopPropagation();
-  toggleMenu();
+  startFishing();
 });
+
+function startFishing() {
+  fishingMode = true;
+  document.getElementById('controls').classList.add('hidden');
+  document.getElementById('drag-handle').classList.add('hidden');
+  window.electronAPI.startFishing();
+  updateStatus('Fishing mode - Press ESC to exit');
+}
+
+function stopFishing() {
+  fishingMode = false;
+  document.getElementById('controls').classList.remove('hidden');
+  document.getElementById('drag-handle').classList.remove('hidden');
+  window.electronAPI.stopFishing();
+  updateStatus('Ready');
+}
 
 // Store timeout IDs for each tile to allow canceling
 const tileTimeouts = new Map();
@@ -215,9 +233,10 @@ function highlightTile(tile) {
   tileTimeouts.set(tile, timeoutId);
 }
 
-// Listen for tile clicks from the global mouse tracker
 window.electronAPI.onTileClicked(({ col, row, x, y }) => {
-  console.log('Tile clicked from tracker:', col, row, 'at', x, y);
+  if (!fishingMode) return;
+  
+  console.log('Tile clicked:', col, row, 'at', x, y);
   
   if (col >= 0 && col < GRID_COLS && row >= 0 && row < GRID_ROWS) {
     const index = row * GRID_COLS + col;
@@ -230,9 +249,11 @@ window.electronAPI.onTileClicked(({ col, row, x, y }) => {
 document.addEventListener('keydown', (e) => {
   if (e.key === 'c' || e.key === 'C') {
     startCalibration();
-  } else if (e.key === 'm' || e.key === 'M') {
-    toggleMenu();
   }
+});
+
+window.electronAPI.onExitFishing(() => {
+  stopFishing();
 });
 
 window.addEventListener('resize', () => {

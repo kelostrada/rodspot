@@ -121,6 +121,7 @@ int main(int argc, char *argv[]) {
     CFRunLoopRun();
     
     // Cleanup
+    CFRunLoopRemoveSource(CFRunLoopGetCurrent(), runLoopSource, kCFRunLoopCommonModes);
     CFRelease(runLoopSource);
     CFRelease(tap);
     
