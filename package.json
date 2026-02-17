@@ -4,8 +4,8 @@
   "description": "Transparent grid overlay with global mouse tracking for gaming",
   "main": "src/main.js",
   "scripts": {
-    "start": "electron .",
-    "dev": "electron .",
+    "start": "npm run build-native && electron .",
+    "dev": "npm run build-native && electron .",
     "build-native": "mkdir -p build && gcc -framework ApplicationServices -o build/global_mouse_tracker native/global_mouse_tracker.c",
     "clean-native": "rm -f build/global_mouse_tracker"
   },
