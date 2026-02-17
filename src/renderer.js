@@ -193,14 +193,26 @@ document.getElementById('btn-hide-menu').addEventListener('click', (e) => {
   toggleMenu();
 });
 
+// Store timeout IDs for each tile to allow canceling
+const tileTimeouts = new Map();
+
 function highlightTile(tile) {
+  // Clear existing timeout for this tile if any
+  if (tileTimeouts.has(tile)) {
+    clearTimeout(tileTimeouts.get(tile));
+  }
+
   tile.classList.remove('highlight');
   void tile.offsetWidth;
   tile.classList.add('highlight');
 
-  setTimeout(() => {
+  // Set new timeout and store it
+  const timeoutId = setTimeout(() => {
     tile.classList.remove('highlight');
+    tileTimeouts.delete(tile);
   }, 10000);
+
+  tileTimeouts.set(tile, timeoutId);
 }
 
 // Listen for tile clicks from the global mouse tracker
