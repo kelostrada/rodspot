@@ -22,13 +22,15 @@
     "files": [
       "src/**/*",
       "native/**/*",
+      "build/**/*",
       "package.json"
     ],
     "mac": {
       "target": "dmg"
     },
     "win": {
-      "target": "nsis"
+      "target": "dir",
+      "asarUnpack": ["build/**/*"]
     },
     "linux": {
       "target": "AppImage"

@@ -1,7 +1,8 @@
 #include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
+#include <io.h>
+#include <fcntl.h>
 
 #define GRID_COLS 15
 #define GRID_ROWS 11
@@ -16,6 +17,13 @@ POINT lastClickPoint = {0, 0};
 DWORD lastClickTime = 0;
 HHOOK mouseHook = NULL;
 HWND hwnd = NULL;
+CRITICAL_SECTION cs;
+
+void output(const char* msg) {
+    EnterCriticalSection(&cs);
+    _write(1, msg, strlen(msg));
+    LeaveCriticalSection(&cs);
+}
 
 void printTileAtPoint(int x, int y) {
     if (x < overlayX || x >= overlayX + overlayWidth ||
@@ -37,7 +45,9 @@ void printTileAtPoint(int x, int y) {
     if (row < 0) row = 0;
     if (row >= GRID_ROWS) row = GRID_ROWS - 1;
     
-    fprintf(stderr, "TILE_CLICKED %d %d %d %d\n", col, row, x, y);
+    char buf[128];
+    _snprintf(buf, sizeof(buf), "TILE_CLICKED %d %d %d %d\n", col, row, x, y);
+    output(buf);
 }
 
 LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
@@ -84,8 +94,8 @@ int main(int argc, char *argv[]) {
         overlayHeight = atoi(argv[4]);
     }
     
-    setvbuf(stdout, NULL, _IONBF, 0);
-    setvbuf(stderr, NULL, _IONBF, 0);
+    InitializeCriticalSection(&cs);
+    _setmode(1, _O_BINARY);
     
     WNDCLASS wc = {0};
     wc.lpfnWndProc = WndProc;
@@ -95,21 +105,20 @@ int main(int argc, char *argv[]) {
     
     hwnd = CreateWindowEx(0, "RodSpotTracker", NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL);
     if (!hwnd) {
-        fprintf(stderr, "Failed to create window\n");
+        output("Failed to create window\n");
         return 1;
     }
     
-    fprintf(stderr, "Mouse tracker started\n");
-    fprintf(stderr, "Overlay bounds: x=%d y=%d w=%d h=%d\n", overlayX, overlayY, overlayWidth, overlayHeight);
+    output("Mouse tracker started\n");
     
     mouseHook = SetWindowsHookEx(WH_MOUSE_LL, MouseProc, GetModuleHandle(NULL), 0);
     
     if (!mouseHook) {
-        fprintf(stderr, "Failed to create mouse hook (error %lu)\n", GetLastError());
+        output("Failed to create mouse hook\n");
         return 1;
     }
     
-    fprintf(stderr, "Hook installed, monitoring...\n");
+    output("Hook installed\n");
     
     MSG msg;
     while (GetMessage(&msg, NULL, 0, 0)) {
@@ -118,5 +127,6 @@ int main(int argc, char *argv[]) {
     }
     
     UnhookWindowsHookEx(mouseHook);
+    DeleteCriticalSection(&cs);
     return 0;
 }

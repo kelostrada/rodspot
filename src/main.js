@@ -127,9 +127,16 @@ function startMouseTracker() {
   
   const bounds = overlayWindow.getBounds();
   const ext = os.platform() === 'win32' ? '.exe' : '';
-  const trackerPath = path.join(__dirname, '..', 'build', `global_mouse_tracker${ext}`);
   
-  console.log('Starting mouse tracker with bounds:', bounds);
+  let trackerPath;
+  if (process.resourcesPath && fs.existsSync(path.join(process.resourcesPath, 'app.asar.unpacked', 'build', `global_mouse_tracker${ext}`))) {
+    trackerPath = path.join(process.resourcesPath, 'app.asar.unpacked', 'build', `global_mouse_tracker${ext}`);
+  } else {
+    trackerPath = path.join(__dirname, '..', 'build', `global_mouse_tracker${ext}`);
+  }
+  
+  console.log('Starting mouse tracker:', trackerPath);
+  console.log('Bounds:', bounds);
   
   mouseTracker = spawn(trackerPath, [
     bounds.x.toString(),
@@ -157,10 +164,6 @@ function startMouseTracker() {
         }
       }
     });
-  });
-  
-  mouseTracker.stdout.on('data', (data) => {
-    console.log('Tracker stdout:', data.toString());
   });
   
   mouseTracker.on('close', (code) => {
